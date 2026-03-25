@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>シフト希望入力 — Studio Ivy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:       #f5f2eb;
+  --paper:    #faf8f4;
+  --sur:      #ffffff;
+  --ink:      #1c1c1a;
+  --ink2:     #4a4844;
+  --ink3:     #8a8780;
+  --rule:     #e0dbd1;
+
+  --empty-bg: #e8e4dc;
+  --empty-tx: #aaa8a0;
+
+  --pref-bg:  #1a4a7a;
+  --pref-l:   #dbeeff;
+  --pref-tx:  #ffffff;
+
+  --fixed-bg: #a86010;
+  --fixed-l:  #fdf0d8;
+  --fixed-tx: #ffffff;
+
+  --green:    #1D9E75;
+  --green-l:  #e6f4ef;
+  --amber:    #c87a20;
+  --red:      #c04828;
+  --blue:     #2B7FCC;
+
+  --mode-h:   48px;
+  --cell-w:   54px;
+  --cell-h:   36px;
+  --sticky-top: 100px; /* header(52) + mode bar(48) */
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { overflow-x: auto; }
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13px;
+  min-height: 100vh;
+  min-width: max-content;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--ink);
+  position: sticky;
+  top: 0;
+  z-index: 300;
+  height: 52px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+  min-width: 100%;
+}
+.header-inner {
+  max-width: none;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 0 16px;
+}
+.logo { font-family:'DM Mono',monospace; font-size:11px; color:#666; letter-spacing:.1em; white-space:nowrap; }
+.month-badge {
+  background: var(--green); color:#fff;
+  font-family:'DM Mono',monospace; font-size:11px;
+  padding: 3px 10px; border-radius:20px; white-space:nowrap;
+}
+.hdr-spacer { flex:1; }
+.hdr-counts {
+  font-family:'DM Mono',monospace; font-size:11px; color:#777;
+  white-space:nowrap; display:flex; gap:10px;
+}
+.hdr-cnt-fixed { color: #e8b870; }
+.hdr-cnt-pref  { color: #7ab8e8; }
+
+/* ── MODE BAR ── */
+.mode-bar {
+  background: var(--sur);
+  border-bottom: 1px solid var(--rule);
+  position: sticky;
+  top: 52px;
+  z-index: 200;
+  height: var(--mode-h);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  min-width: 100%;
+}
+.mode-bar-inner {
+  max-width: none;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  padding: 0 16px;
+}
+.mode-label { font-size:11px; color:var(--ink3); white-space:nowrap; }
+
+.mode-btns { display:flex; gap:0; }
+.mode-btn {
+  padding: 8px 20px;
+  border: 1.5px solid var(--rule);
+  background: transparent;
+  color: var(--ink3);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mode-btn:first-child { border-radius:8px 0 0 8px; }
+.mode-btn:last-child  { border-radius:0 8px 8px 0; border-left:none; }
+.mode-btn.mode-pref.active {
+  background: var(--pref-bg); color:#fff; border-color:var(--pref-bg);
+  box-shadow: 0 2px 8px rgba(26,74,122,.3);
+}
+.mode-btn.mode-fixed.active {
+  background: var(--fixed-bg); color:#fff; border-color:var(--fixed-bg);
+  box-shadow: 0 2px 8px rgba(168,96,16,.3);
+}
+.mode-dot { width:9px; height:9px; border-radius:50%; }
+
+.mode-divider { width:1px; height:28px; background:var(--rule); flex-shrink:0; }
+.mode-hint {
+  font-size:11px; color:var(--ink3); white-space:nowrap;
+  font-family:'DM Mono',monospace;
+}
+
+/* identity selects */
+.id-selects { display:flex; gap:8px; align-items:center; margin-left:auto; }
+.field-sel {
+  padding:6px 26px 6px 10px;
+  border:1.5px solid var(--rule);
+  border-radius:7px;
+  font-size:12px;
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8780'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 8px center;
+  cursor:pointer;
+  transition:border-color .15s;
+}
+.field-sel:focus { outline:none; border-color:var(--green); }
+
+/* ── GRID ── */
+.grid-wrap { overflow-x: visible; padding:12px 16px 90px; }
+.grid-inner { max-width: none; }
+
+.sched-table { border-collapse:separate; border-spacing:0; width:max-content; min-width:100vw; }
+
+/* thead */
+.sched-table thead {
+  position: sticky;
+  top: var(--sticky-top);
+  z-index: 20;
+}
+.sched-table thead th {
+  background: var(--ink);
+  color: #888;
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  font-weight:400;
+  padding: 7px 3px 5px;
+  text-align:center;
+  border-bottom: 2px solid #333;
+  white-space:nowrap;
+  letter-spacing:.02em;
+}
+.th-date {
+  min-width:88px; text-align:left; padding-left:10px;
+  position:sticky; left:0; z-index:30;
+  background:var(--ink);
+}
+.th-block { min-width:82px; border-left:1px solid #2a2a2a; }
+.th-slot  { width:var(--cell-w); min-width:var(--cell-w); }
+.th-slot.eve-s { border-left:2px solid #3a3a38; }
+.am-lbl { color:var(--green); } .pm-lbl { color:#6ba8e2; }
+
+/* tbody */
+.sched-table tbody tr td { border-bottom:1px solid var(--rule); }
+.sched-table tbody tr:nth-child(odd)  td { background: var(--sur); }
+.sched-table tbody tr:nth-child(even) td { background: #f8f5ee; }
+.sched-table tbody tr.week-gap td { height:5px; background:var(--bg)!important; border:none; }
+
+.td-date {
+  padding:0 6px 0 10px; white-space:nowrap;
+  position:sticky; left:0; z-index:10;
+  min-width:88px; border-right:1px solid var(--rule);
+}
+.sched-table tbody tr:nth-child(odd) .td-date  { background:var(--sur); }
+.sched-table tbody tr:nth-child(even) .td-date { background:#f8f5ee; }
+.date-inner { display:flex; align-items:center; gap:5px; height:var(--cell-h); }
+.date-num { font-family:'DM Mono',monospace; font-size:13px; font-weight:500; min-width:22px; }
+.date-dow { font-size:11px; color:var(--ink3); }
+.date-dow.sun { color:var(--red); } .date-dow.sat { color:var(--blue); }
+
+.td-block { padding:2px 4px; min-width:82px; border-right:2px solid var(--rule); border-left:1px solid var(--rule); }
+.block-btns { display:flex; flex-direction:column; gap:2px; }
+.blk-btn {
+  padding:3px 6px; border:1px solid var(--rule); border-radius:4px;
+  background:var(--bg); color:var(--ink3);
+  font-size:9px; font-weight:700; font-family:'DM Mono',monospace;
+  cursor:pointer; text-align:center; transition:all .12s; white-space:nowrap;
+}
+.blk-btn:hover { border-color:var(--fixed-bg); color:var(--fixed-bg); background:var(--fixed-l); }
+.blk-btn.on { background:var(--fixed-bg); color:#fff; border-color:var(--fixed-bg); }
+
+.td-slot { padding:2px; width:var(--cell-w); min-width:var(--cell-w); }
+.td-slot.eve-s { border-left:2px solid var(--rule); }
+
+.slot-cell {
+  width:100%; height:calc(var(--cell-h) - 4px);
+  border-radius:5px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:700; font-family:'DM Mono',monospace;
+  cursor:pointer; user-select:none;
+  transition:transform .07s, filter .07s, background .12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.slot-cell:active { transform:scale(.92); }
+.s-empty { background:var(--empty-bg); color:var(--empty-tx); }
+.s-pref  { background:var(--pref-bg);  color:var(--pref-tx);  box-shadow:0 1px 4px rgba(26,74,122,.25); }
+.s-fixed { background:var(--fixed-bg); color:var(--fixed-tx); box-shadow:0 1px 4px rgba(168,96,16,.25); }
+.s-empty:hover { background:#dedad2; }
+.s-pref:hover  { filter:brightness(1.15); }
+.s-fixed:hover { filter:brightness(1.12); }
+
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  position:fixed; bottom:0; left:0; right:0; min-width:100%;
+  background:var(--sur); border-top:1px solid var(--rule);
+  padding:10px 16px;
+  box-shadow:0 -4px 20px rgba(0,0,0,.08);
+  z-index:150;
+}
+.bottom-inner {
+  max-width: none; margin:0;
+  display:flex; align-items:center; gap:12px;
+}
+.bottom-summary { flex:1; font-size:12px; color:var(--ink2); }
+.bottom-summary b { color:var(--ink); }
+
+.action-btns { display:flex; gap:8px; }
+.btn-gdrive {
+  padding:10px 20px;
+  background:var(--green); color:#fff;
+  border:none; border-radius:9px;
+  font-size:13px; font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;
+  cursor:pointer; transition:opacity .15s;
+  display:flex; align-items:center; gap:7px;
+  white-space:nowrap;
+}
+.btn-gdrive:hover { opacity:.87; }
+.btn-gdrive:disabled { background:var(--rule); color:var(--ink3); cursor:not-allowed; }
+.btn-csv {
+  padding:10px 16px;
+  background:transparent; color:var(--ink2);
+  border:1.5px solid var(--rule); border-radius:9px;
+  font-size:12px; font-weight:500;
+  font-family:'Noto Sans JP',sans-serif;
+  cursor:pointer; transition:all .15s;
+  white-space:nowrap;
+}
+.btn-csv:hover { border-color:var(--ink3); color:var(--ink); }
+
+/* ── SETUP MODAL ── */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  z-index:800; display:none; align-items:center; justify-content:center;
+  padding:16px;
+}
+.modal-overlay.open { display:flex; }
+.modal {
+  background:var(--sur); border-radius:14px;
+  width:100%; max-width:560px;
+  max-height:90vh; overflow-y:auto;
+  box-shadow:0 8px 40px rgba(0,0,0,.2);
+}
+.modal-header {
+  padding:20px 20px 0;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+}
+.modal-title { font-size:16px; font-weight:700; line-height:1.3; }
+.modal-close {
+  padding:4px 8px; border:none; background:transparent;
+  color:var(--ink3); font-size:18px; cursor:pointer; flex-shrink:0;
+  line-height:1; border-radius:4px;
+}
+.modal-close:hover { background:var(--bg); }
+.modal-body { padding:16px 20px 20px; }
+
+.setup-steps { display:flex; flex-direction:column; gap:0; margin-bottom:16px; }
+.setup-step { display:flex; gap:12px; padding-bottom:16px; position:relative; }
+.setup-step:not(:last-child)::before {
+  content:''; position:absolute; left:14px; top:30px; bottom:0;
+  width:1px; background:var(--rule);
+}
+.step-num {
+  width:28px; height:28px; border-radius:50%;
+  background:var(--ink); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'DM Mono',monospace; font-size:12px; flex-shrink:0;
+}
+.step-body { padding-top:4px; }
+.step-title { font-size:13px; font-weight:700; margin-bottom:4px; }
+.step-desc { font-size:12px; color:var(--ink2); line-height:1.7; }
+.step-desc a { color:var(--blue); }
+.step-desc code {
+  font-family:'DM Mono',monospace; background:var(--bg);
+  padding:1px 5px; border-radius:3px; font-size:11px;
+}
+
+.client-id-input {
+  width:100%; padding:9px 12px;
+  border:1.5px solid var(--rule); border-radius:8px;
+  font-family:'DM Mono',monospace; font-size:12px;
+  color:var(--ink); background:var(--bg);
+  margin-top:8px;
+}
+.client-id-input:focus { outline:none; border-color:var(--green); }
+.client-id-input::placeholder { color:var(--ink3); }
+
+.save-client-btn {
+  margin-top:8px; padding:8px 18px;
+  background:var(--green); color:#fff;
+  border:none; border-radius:7px;
+  font-size:12px; font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;
+  cursor:pointer; transition:opacity .15s;
+}
+.save-client-btn:hover { opacity:.87; }
+
+.modal-note {
+  background:var(--green-l); border:1px solid rgba(29,158,117,.3);
+  border-radius:8px; padding:10px 14px;
+  font-size:11px; color:var(--ink2); line-height:1.7;
+  margin-top:12px;
+}
+.modal-note b { color:var(--ink); }
+
+
+/* store badge inside cell */
+.slot-cell .store-badge {
+  font-size:8px; font-weight:700; font-family:'DM Mono',monospace;
+  position:absolute; top:2px; right:3px; opacity:.85; line-height:1;
+}
+/* どちらでも = purple */
+.s-both-pref  { background:#6B40B8; color:#fff; box-shadow:0 1px 4px rgba(107,64,184,.25); }
+.s-both-fixed { background:#8B3A8B; color:#fff; box-shadow:0 1px 4px rgba(139,58,139,.25); }
+.s-both-pref:hover  { filter:brightness(1.15); }
+.s-both-fixed:hover { filter:brightness(1.12); }
+/* dim: other stores' entries shown at reduced opacity */
+.s-pref-dim  { background:rgba(26,74,122,.22);  color:rgba(26,74,122,.7);  border:1px dashed rgba(26,74,122,.35); }
+.s-fixed-dim { background:rgba(168,96,16,.18);  color:rgba(168,96,16,.65); border:1px dashed rgba(168,96,16,.3); }
+.s-both-dim  { background:rgba(107,64,184,.18); color:rgba(107,64,184,.65);border:1px dashed rgba(107,64,184,.3); }
+.s-pref-dim:hover  { background:rgba(26,74,122,.3); }
+.s-fixed-dim:hover { background:rgba(168,96,16,.28); }
+.s-both-dim:hover  { background:rgba(107,64,184,.28); }
+
+/* ── DEADLINE BANNER ── */
+.deadline-banner {
+  background: var(--red);
+  color: #fff;
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  position: sticky;
+  top: var(--mode-h);
+  z-index: 190;
+  display: none;
+}
+.deadline-banner.show { display: block; }
+.deadline-ok {
+  background: var(--green-l);
+  border-bottom: 1px solid rgba(29,158,117,.3);
+  color: var(--green);
+  text-align: center;
+  padding: 6px 16px;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  position: sticky;
+  top: calc(52px + var(--mode-h));
+  z-index: 190;
+}
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; top:68px; left:50%;
+  transform:translateX(-50%) translateY(-8px);
+  background:var(--ink); color:#fff;
+  padding:9px 18px; border-radius:9px;
+  font-size:12px; font-weight:500;
+  opacity:0; pointer-events:none;
+  transition:all .22s; z-index:999;
+  white-space:nowrap; max-width:90vw;
+  text-overflow:ellipsis; overflow:hidden;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.ok   { background:var(--green); }
+.toast.err  { background:var(--red); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <span class="logo">STUDIO IVY</span>
+    <span class="month-badge" id="month-badge"></span>
+    <div class="hdr-spacer"></div>
+    <div class="hdr-counts">
+      <span>固定 <span class="hdr-cnt-fixed" id="hcnt-fixed">0</span></span>
+      <span>希望 <span class="hdr-cnt-pref" id="hcnt-pref">0</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- MODE BAR -->
+<div class="mode-bar">
+  <div class="mode-bar-inner">
+    <span class="mode-label">モード:</span>
+    <div class="mode-btns">
+      <button class="mode-btn mode-pref" id="btn-mode-pref" onclick="setMode('pref')">
+        <div class="mode-dot" style="background:var(--pref-bg)"></div>希望
+      </button>
+      <button class="mode-btn mode-fixed active" id="btn-mode-fixed" onclick="setMode('fixed')">
+        <div class="mode-dot" style="background:var(--fixed-bg)"></div>固定
+      </button>
+    </div>
+    <div class="mode-divider"></div>
+    <span class="mode-hint" id="mode-hint">モード選択 → セルをクリックでON/OFF</span>
+    <div class="id-selects">
+      <select class="field-sel" id="sel-inst" onchange="updateBar()">
+        <option value="">名前を選択</option>
+        <option>HITOMI</option><option>MAI.Y</option><option>AZUSA</option>
+        <option>RINA.F</option><option>SAYA</option><option>AOI.T</option>
+      </select>
+      <select class="field-sel" id="sel-store" onchange="onStoreChange()">
+        <option value="">表示店舗（任意）</option>
+        <option>後楽園店</option><option>本蓮沼店</option><option>どちらでも</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- DEADLINE BANNER -->
+<div class="deadline-banner" id="deadline-banner">
+  ⚠ 提出期限（今月5日）を過ぎています。Takashiに直接連絡してください。
+</div>
+<div class="deadline-ok" id="deadline-ok"></div>
+
+<!-- GRID -->
+<div class="grid-wrap">
+  <div class="grid-inner">
+    <table class="sched-table" id="main-table">
+      <thead></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bottom-inner">
+    <div class="bottom-summary" id="bar-summary">名前を選択してください</div>
+    <div class="action-btns">
+      <button class="btn-csv" onclick="doCSV()">▾ CSVのみ</button>
+      <button class="btn-gdrive" id="btn-drive" onclick="doDrive()" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Googleドライブに保存
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP MODAL -->
+<div class="modal-overlay" id="setup-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Googleドライブ連携のセットアップ</div>
+      <button class="modal-close" onclick="closeSetup()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--ink2);margin-bottom:16px;line-height:1.7">
+        初回のみ、GoogleクラウドでOAuthクライアントIDを取得する必要があります（無料・5〜10分）。
+      </p>
+      <div class="setup-steps">
+        <div class="setup-step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Google Cloud Consoleを開く</div>
+            <div class="step-desc">
+              <a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> にアクセス → 「新しいプロジェクト」を作成（名前は何でもOK）
+            </div>
+          </div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Google Drive APIを有効化</div>
+            <div class="step-desc">
+              「APIとサービス」→「ライブラリ」→「Google Drive API」を検索して有効化
+            </div>
+          </div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">OAuth同意画面を設定</div>
+            <div class="step-desc">
+              「APIとサービス」→「OAuth同意画面」→「外部」を選択 → アプリ名に <code>Studio Ivy Shift</code> と入力 → 保存
+            </div>
+          </div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">認証情報を作成</div>
+            <div class="step-desc">
+              「認証情報」→「認証情報を作成」→「OAuthクライアントID」→<br>
+              アプリケーションの種類: <code>ウェブ アプリケーション</code><br>
+              承認済みのJavaScriptオリジン: このHTMLファイルのURL（またはローカルなら <code>http://localhost</code> または <code>null</code>）
+            </div>
+          </div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <div class="step-title">クライアントIDを貼り付ける</div>
+            <div class="step-desc">
+              作成後に表示される「クライアントID」（〜.apps.googleusercontent.com）をコピーして下に貼り付けてください
+            </div>
+            <input class="client-id-input" id="client-id-input"
+              placeholder="xxxxx.apps.googleusercontent.com" />
+            <br>
+            <button class="save-client-btn" onclick="saveClientId()">保存して連携する</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-note">
+        <b>アクセス権限について：</b> このツールはシフトCSVファイルをドライブにアップロードする権限のみ要求します。既存のファイルの読み取りや削除はしません。
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  CONFIG — paste your OAuth Client ID here OR via setup modal
+// ═══════════════════════════════════════════════════════════
+let CLIENT_ID = localStorage.getItem('ivy_gdrive_client_id') || '';
+const SCOPE = 'https://www.googleapis.com/auth/drive.file';
+
+// ═══════════════════════════════════════════════════════════
+//  CONSTANTS — 対象月を自動計算
+//  入力期間: 当月1〜5日 → 翌月のシフトを入力
+// ═══════════════════════════════════════════════════════════
+const DEADLINE_DAY = 5;  // 提出締め切り日
+
+function calcTargetMonth(){
+  const now = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return { year: target.getFullYear(), month: target.getMonth() + 1 };
+}
+
+function calcDeadline(){
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), DEADLINE_DAY, 23, 59, 59);
+}
+
+function isDeadlinePassed(){
+  return new Date() > calcDeadline();
+}
+
+const { year: YEAR, month: MONTH } = calcTargetMonth();
+// DRIVE_FOLDER_NAME uses YEAR/MONTH — must be defined after calcTargetMonth()
+const DRIVE_FOLDER_NAME = `Studio Ivy シフト希望 ${YEAR}-${String(MONTH).padStart(2,'0')}`;
+const SLOTS = [
+  {start:'08:00',end:'08:50'},{start:'09:20',end:'10:10'},
+  {start:'10:40',end:'11:30'},{start:'12:00',end:'12:50'},
+  {start:'13:20',end:'14:10'},{start:'14:40',end:'15:30'},
+  {start:'16:00',end:'16:50'},{start:'17:20',end:'18:10'},
+  {start:'18:40',end:'19:30'},{start:'20:00',end:'20:50'},
+];
+const EVE = 5;
+const DNAMES = ['日','月','火','水','木','金','土'];
+
+// storeState[store][dateStr][slotIdx] = 0(empty)|1(pref)|2(fixed)
+const storeState = { '後楽園店':{}, '本蓮沼店':{}, 'どちらでも':{} };
+let curMode = 'fixed'; // 'pref' | 'fixed'
+
+function curStore(){ return document.getElementById('sel-store').value || '後楽園店'; } // 空の場合は後楽園で代替（表示のみ）
+
+// Read current store's value
+const getS = (ds,si)=>{ const st=storeState[curStore()]; return (st[ds]||{})[si]||0; };
+
+// Write current store, and CLEAR the same slot in ALL other stores (no double-booking)
+function setS(ds,si,v){
+  const s = curStore();
+  if(!storeState[s][ds]) storeState[s][ds]={};
+  storeState[s][ds][si] = v;
+  // If setting a value (not clearing), clear every other store bucket
+  if(v > 0){
+    ['後楽園店','本蓮沼店','どちらでも'].forEach(other=>{
+      if(other===s) return;
+      if(storeState[other][ds]) storeState[other][ds][si] = 0;
+    });
+  }
+}
+
+// Get ANY store's value for a slot (for rendering dim state)
+function getAnyStoreEntry(ds,si){
+  for(const s of ['後楽園店','本蓮沼店','どちらでも']){
+    const v = (storeState[s][ds]||{})[si]||0;
+    if(v > 0) return {store:s, v};
+  }
+  return null;
+}
+
+function getDays(){
+  const r=[];const n=new Date(YEAR,MONTH,0).getDate();
+  for(let d=1;d<=n;d++) r.push(new Date(YEAR,MONTH-1,d));
+  return r;
+}
+const DAYS = getDays();
+const pad = n=>String(n).padStart(2,'0');
+const dstr = d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+
+function onStoreChange(){
+  buildTable();
+  updateBar();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODE
+// ═══════════════════════════════════════════════════════════
+function setMode(m){
+  curMode = m;
+  document.getElementById('btn-mode-pref').classList.toggle('active', m==='pref');
+  document.getElementById('btn-mode-fixed').classList.toggle('active', m==='fixed');
+  const hints = { pref:'希望モード — クリックでON/OFF', fixed:'固定モード — クリックでON/OFF' };
+  document.getElementById('mode-hint').textContent = hints[m];
+}
+
+// ── Cell appearance helpers ──
+function storeBadge(s){
+  s = s || curStore();
+  if(s==='後楽園店') return '後';
+  if(s==='本蓮沼店') return '本';
+  return '両';
+}
+function cellAppearance(sv, forStore){
+  // forStore: the store this value belongs to (may differ from curStore for dim rendering)
+  const cur = curStore();
+  const isCur = (!forStore || forStore===cur);
+  if(sv===0) return {cls:'s-empty', lbl:''};
+  if(!isCur){
+    // Other store → dim
+    const isBoth = (forStore==='どちらでも');
+    return {cls: isBoth?'s-both-dim': sv===2?'s-fixed-dim':'s-pref-dim', lbl: sv===2?'固定':'希望'};
+  }
+  const isBoth = cur==='どちらでも';
+  if(sv===1) return {cls: isBoth?'s-both-pref':'s-pref',  lbl:'希望'};
+  if(sv===2) return {cls: isBoth?'s-both-fixed':'s-fixed', lbl:'固定'};
+  return {cls:'s-empty',lbl:''};
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BUILD TABLE
+// ═══════════════════════════════════════════════════════════
+function buildTable(){
+  const thead = document.querySelector('#main-table thead');
+  const tbody = document.querySelector('#main-table tbody');
+
+  // Header
+  let h = '<tr>';
+  h += '<th class="th-date">日付</th>';
+  h += '<th class="th-block">一括（固定）</th>';
+  SLOTS.forEach((s,i)=>{
+    const cls = `th-slot${i===EVE?' eve-s':''}`;
+    const lbl = i<EVE?'am-lbl':'pm-lbl';
+    h += `<th class="${cls}"><span class="${lbl}">${s.start}</span></th>`;
+  });
+  h += '</tr>';
+  thead.innerHTML = h;
+
+  // Body
+  let rows = '';
+  DAYS.forEach((d,di)=>{
+    const ds = dstr(d);
+    const dow = d.getDay();
+    if(dow===1 && di>0) rows += '<tr class="week-gap"><td colspan="12"></td></tr>';
+
+    const dowCls = dow===0?'sun':dow===6?'sat':'';
+    rows += `<tr data-ds="${ds}">`;
+    rows += `<td class="td-date"><div class="date-inner">
+      <span class="date-num">${d.getDate()}</span>
+      <span class="date-dow ${dowCls}">(${DNAMES[dow]})</span>
+    </div></td>`;
+
+    // Block buttons
+    rows += `<td class="td-block"><div class="block-btns">
+      <button class="blk-btn" data-ds="${ds}" data-blk="am" onclick="toggleBlock('${ds}',0,4,this)">午前▶1-5</button>
+      <button class="blk-btn" data-ds="${ds}" data-blk="pm" onclick="toggleBlock('${ds}',5,9,this)">午後▶6-10</button>
+    </div></td>`;
+
+    // Slot cells
+    SLOTS.forEach((s,si)=>{
+      const eveCls = si===EVE?' eve-s':'';
+      let sv = getS(ds,si);
+      let dispStore = curStore();
+      let other = null;
+      if(sv===0){ other=getAnyStoreEntry(ds,si); if(other){sv=other.v; dispStore=other.store;} }
+      const {cls:stName,lbl} = cellAppearance(sv, dispStore);
+      const badge = storeBadge(dispStore);
+      rows += `<td class="td-slot${eveCls}">
+        <div class="slot-cell ${stName}" data-ds="${ds}" data-si="${si}" onclick="clickSlot('${ds}',${si},this)">
+          ${sv>0?`<span class='store-badge'>${badge}</span>`:''}${lbl}
+        </div>
+      </td>`;
+    });
+    rows += '</tr>';
+  });
+  tbody.innerHTML = rows;
+  syncBlockBtns();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INTERACTIONS
+// ═══════════════════════════════════════════════════════════
+function clickSlot(ds, si, el){
+  if(curMode==='fixed'){
+    // 固定モード: ブロック全体(1-5 or 6-10)を固定(2)でトグル
+    const start = si < EVE ? 0 : EVE;
+    const end   = si < EVE ? EVE-1 : SLOTS.length-1;
+    let allFixed = true;
+    for(let i=start;i<=end;i++) if(getS(ds,i)!==2){ allFixed=false; break; }
+    const next = allFixed ? 0 : 2;
+    for(let i=start;i<=end;i++){
+      setS(ds,i,next);
+      const cell = document.querySelector(`[data-ds="${ds}"][data-si="${i}"]`);
+      if(cell) refreshCell(cell, ds, i);
+    }
+    syncBlockBtn(ds, start===0?[0,4]:[5,9]);
+    updateCounts();
+    return;
+  }
+  // 希望モード: 個別セルを希望(1)でトグル
+  const cur  = getS(ds,si);
+  const next = (cur===1) ? 0 : 1;
+  setS(ds,si,next);
+  refreshCell(el, ds, si);
+  syncBlockBtn(ds, si<EVE?[0,4]:[5,9]);
+  updateCounts();
+}
+
+function refreshCell(el, ds, si){
+  // Check current store first
+  const sv = getS(ds,si);
+  if(sv > 0){
+    const {cls, lbl} = cellAppearance(sv, curStore());
+    el.className = `slot-cell ${cls}`;
+    el.innerHTML = `<span class='store-badge'>${storeBadge(curStore())}</span>${lbl}`;
+    return;
+  }
+  // Check other stores for dim display
+  const other = getAnyStoreEntry(ds,si);
+  if(other){
+    const {cls, lbl} = cellAppearance(other.v, other.store);
+    el.className = `slot-cell ${cls}`;
+    el.innerHTML = `<span class='store-badge'>${storeBadge(other.store)}</span>${lbl}`;
+    return;
+  }
+  el.className = 'slot-cell s-empty';
+  el.innerHTML = '';
+}
+
+function toggleBlock(ds, start, end, btn){
+  // Check if all in block are already pref
+  let allPref = true;
+  for(let i=start;i<=end;i++) if(getS(ds,i)!==1) { allPref=false; break; }
+  const next = allPref ? 0 : 1;  // toggle between empty and pref
+  for(let i=start;i<=end;i++){
+    setS(ds,i,next);
+    const cell = document.querySelector(`[data-ds="${ds}"][data-si="${i}"]`);
+    if(cell) refreshCell(cell, ds, i);
+  }
+  btn.classList.toggle('on', next===1);
+  updateCounts();
+}
+
+function syncBlockBtn(ds, range){
+  const [start,end] = range;
+  let allPref = true;
+  for(let i=start;i<=end;i++) if(getS(ds,i)!==1){ allPref=false; break; }
+  const blk = start===0?'am':'pm';
+  const btn = document.querySelector(`.blk-btn[data-ds="${ds}"][data-blk="${blk}"]`);
+  if(btn) btn.classList.toggle('on', allPref);
+}
+
+function syncBlockBtns(){
+  DAYS.forEach(d=>{
+    const ds=dstr(d);
+    syncBlockBtn(ds,[0,4]);
+    syncBlockBtn(ds,[5,9]);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COUNTS & BAR
+// ═══════════════════════════════════════════════════════════
+function countAllStores(){
+  let fixed=0, pref=0;
+  const allStores = ['後楽園店','本蓮沼店','どちらでも'];
+  DAYS.forEach(d=>{
+    const ds=dstr(d);
+    SLOTS.forEach((_,si)=>{
+      allStores.forEach(st=>{
+        const v=(storeState[st][ds]||{})[si]||0;
+        if(v===2)fixed++; else if(v===1)pref++;
+      });
+    });
+  });
+  return {fixed,pref};
+}
+
+function updateCounts(){
+  const {fixed,pref} = countAllStores();
+  document.getElementById('hcnt-fixed').textContent = fixed;
+  document.getElementById('hcnt-pref').textContent  = pref;
+  updateBar();
+}
+
+function updateBar(){
+  const inst = document.getElementById('sel-inst').value;
+  const btn  = document.getElementById('btn-drive');
+
+  // Count per store for detailed summary
+  const countFor = st=>{
+    let f=0,p=0;
+    DAYS.forEach(d=>{ const ds=dstr(d); SLOTS.forEach((_,si)=>{ const v=(storeState[st][ds]||{})[si]||0; if(v===2)f++; else if(v===1)p++; }); });
+    return {f,p};
+  };
+  const ko = countFor('後楽園店');
+  const ho = countFor('本蓮沼店');
+  const bt = countFor('どちらでも');
+  const total = (ko.f+ko.p) + (ho.f+ho.p) + (bt.f+bt.p);
+
+  if(!inst){
+    document.getElementById('bar-summary').textContent = '名前を選択してください';
+    btn.disabled = true;
+    return;
+  }
+  if(total===0){
+    document.getElementById('bar-summary').innerHTML = `<b>${inst}</b> — まだ希望が入力されていません`;
+    btn.disabled = true;
+    return;
+  }
+
+  const parts = [];
+  if(ko.f+ko.p > 0) parts.push(`後楽園 固${ko.f}+希${ko.p}`);
+  if(ho.f+ho.p > 0) parts.push(`本蓮沼 固${ho.f}+希${ho.p}`);
+  if(bt.f+bt.p > 0) parts.push(`両店舗 固${bt.f}+希${bt.p}`);
+  document.getElementById('bar-summary').innerHTML =
+    `<b>${inst}</b> &nbsp;—&nbsp; ${parts.join('　')} &nbsp;= 計 <b>${total}</b>枠`;
+  btn.disabled = false;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CSV BUILDER
+// ═══════════════════════════════════════════════════════════
+function buildCSV(){
+  const inst = document.getElementById('sel-inst').value;
+  const rows = ['インストラクター,店舗,日付,開始時間,タイプ'];
+
+  // Export ALL three buckets in one pass.
+  // 'どちらでも' expands to both stores.
+  const exportMap = [
+    { bucket: '後楽園店', outputStore: '後楽園店' },
+    { bucket: '本蓮沼店', outputStore: '本蓮沼店' },
+    { bucket: 'どちらでも', outputStore: '後楽園店' },  // expand part 1
+    { bucket: 'どちらでも', outputStore: '本蓮沼店' },  // expand part 2
+  ];
+
+  exportMap.forEach(({bucket, outputStore})=>{
+    const data = storeState[bucket] || {};
+    DAYS.forEach(d=>{
+      const ds = dstr(d);
+      SLOTS.forEach((s,si)=>{
+        const sv = (data[ds]||{})[si] || 0;
+        if(!sv) return;
+        // For 'どちらでも' avoid duplicate: only add once per outputStore
+        // (exportMap has both expansions so each will fire once)
+        rows.push([inst, outputStore, ds, s.start, sv===2?'固定':'希望'].join(','));
+      });
+    });
+  });
+
+  // Deduplicate: same inst+store+date+time (keep first occurrence)
+  const seen = new Set();
+  const deduped = rows.filter((r,i)=>{
+    if(i===0) return true; // header
+    if(seen.has(r)) return false;
+    seen.add(r); return true;
+  });
+  return deduped.join('\n');
+}
+
+function csvFilename(){
+  const inst = document.getElementById('sel-inst').value;
+  return `shift_${inst}_${YEAR}-${String(MONTH).padStart(2,'0')}.csv`;
+}
+
+// ── Download CSV locally ──
+function doCSV(){
+  const inst=document.getElementById('sel-inst').value;
+  if(!inst){ toast('名前を選択してください','err'); return; }
+  const csv = '\uFEFF' + buildCSV();
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=csvFilename();
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast('✓ CSVをダウンロードしました — LINEで送付してください','ok');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GOOGLE DRIVE UPLOAD
+// ═══════════════════════════════════════════════════════════
+function doDrive(){
+  const inst=document.getElementById('sel-inst').value;
+  if(!inst){ toast('名前を選択してください','err'); return; }
+  if(!CLIENT_ID){
+    openSetup(); return;
+  }
+  startOAuth();
+}
+
+function startOAuth(){
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPE,
+    callback: (tokenResp)=>{
+      if(tokenResp.error){ toast('認証エラー: '+tokenResp.error,'err'); return; }
+      uploadToDrive(tokenResp.access_token);
+    }
+  });
+  client.requestAccessToken();
+}
+
+async function uploadToDrive(token){
+  toast('アップロード中…');
+  try {
+    const csv     = '\uFEFF' + buildCSV();
+    const fname   = csvFilename();
+    const boundary = 'ivy_boundary_xyz';
+    const meta     = JSON.stringify({ name: fname, mimeType:'text/csv' });
+
+    const body = [
+      `--${boundary}`,
+      'Content-Type: application/json; charset=UTF-8',
+      '', meta, '',
+      `--${boundary}`,
+      'Content-Type: text/csv',
+      '', csv, '',
+      `--${boundary}--`
+    ].join('\r\n');
+
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer '+token,
+        'Content-Type':`multipart/related; boundary=${boundary}`
+      },
+      body
+    });
+
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    toast(`✓ Googleドライブに保存しました（${fname}）`,'ok');
+  } catch(e){
+    toast('アップロード失敗: '+e.message,'err');
+  }
+}
+
+// ── Setup modal ──
+function openSetup(){
+  document.getElementById('client-id-input').value = CLIENT_ID;
+  document.getElementById('setup-modal').classList.add('open');
+}
+function closeSetup(){ document.getElementById('setup-modal').classList.remove('open'); }
+
+function saveClientId(){
+  const v = document.getElementById('client-id-input').value.trim();
+  if(!v){ toast('クライアントIDを入力してください','err'); return; }
+  CLIENT_ID = v;
+  localStorage.setItem('ivy_gdrive_client_id', v);
+  closeSetup();
+  toast('✓ クライアントIDを保存しました。もう一度「Googleドライブに保存」を押してください','ok');
+}
+
+// ── Toast ──
+function toast(msg, type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast show'+(type?' '+type:'');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('show'), type==='ok'?3000:4000);
+}
+
+// ── Close modal on overlay click ──
+document.getElementById('setup-modal').addEventListener('click',e=>{
+  if(e.target===e.currentTarget) closeSetup();
+});
+
+// ── ESC ──
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSetup(); });
+
+// ── INIT ──
+// ── Set month badge ──
+document.getElementById('month-badge').textContent = `${YEAR}年${MONTH}月`;
+
+// ── Deadline status ──
+(function(){
+  const now = new Date();
+  const dl  = calcDeadline();
+  const day = now.getDate();
+  const banner  = document.getElementById('deadline-banner');
+  const okBadge = document.getElementById('deadline-ok');
+
+  if(isDeadlinePassed()){
+    banner.classList.add('show');
+    // Disable submit buttons
+    document.getElementById('btn-drive').disabled = true;
+    document.getElementById('btn-drive').title = '提出期限を過ぎています';
+    document.querySelector('.btn-csv') && (document.querySelector('.btn-csv').disabled = true);
+  } else {
+    const remaining = DEADLINE_DAY - day;
+    if(remaining >= 0){
+      okBadge.textContent = `📅 ${YEAR}年${MONTH}月シフト希望　提出期限: 今月${DEADLINE_DAY}日（あと${remaining}日）`;
+    }
+  }
+})();
+
+buildTable();
+updateCounts();
+setMode('fixed');
+</script>
+</body>
+</html>
