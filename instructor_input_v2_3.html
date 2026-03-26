@@ -572,7 +572,8 @@ body {
 // ═══════════════════════════════════════════════════════════
 //  CONFIG — paste your OAuth Client ID here OR via setup modal
 // ═══════════════════════════════════════════════════════════
-let CLIENT_ID = localStorage.getItem('ivy_gdrive_client_id') || '';
+// クライアントIDを直接埋め込み（インストラクターのセットアップ不要）
+const CLIENT_ID = '157898302114-15288b5o0svag8apummp7454ovdu51fe.apps.googleusercontent.com';
 const SCOPE = 'https://www.googleapis.com/auth/drive.file';
 
 // ═══════════════════════════════════════════════════════════
