@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>シフト希望入力ガイド — Studio Ivy</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap');
+:root{--cream:#f5f2eb;--white:#fff;--ink:#1c1c1a;--ink2:#4a4844;--ink3:#8a8780;--rule:#e0dbd1;--green:#1D9E75;--green-l:#e6f4ef;--amber:#a86010;--amber-l:#fdf0d8;--blue:#1a4a7a;--blue-l:#dbeeff;--red:#c04828;--red-l:#fdeee7;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--cream);color:var(--ink);font-size:14px;line-height:1.8;}
+.page{max-width:680px;margin:0 auto;padding:32px 20px 80px;}
+.doc-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--ink3);text-transform:uppercase;margin-bottom:6px;}
+.doc-header{border-bottom:3px solid var(--ink);padding-bottom:18px;margin-bottom:32px;}
+.doc-title{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-bottom:6px;}
+.doc-sub{font-size:13px;color:var(--ink2);margin-bottom:10px;}
+.url-chip{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:#e8e6de;font-family:'DM Mono',monospace;font-size:11px;padding:5px 12px;border-radius:6px;word-break:break-all;}
+.section{margin-bottom:36px;}
+.sec-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink3);letter-spacing:.08em;margin-bottom:3px;}
+.sec-title{font-size:17px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--rule);}
+.steps{display:flex;flex-direction:column;gap:0;}
+.step{display:flex;gap:14px;padding-bottom:18px;position:relative;}
+.step:not(:last-child)::before{content:'';position:absolute;left:14px;top:30px;bottom:0;width:1px;background:var(--rule);}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;flex-shrink:0;}
+.step-body{flex:1;padding-top:4px;}
+.step-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.step-desc{font-size:13px;color:var(--ink2);line-height:1.7;}
+.callout{border-left:3px solid;border-radius:0 8px 8px 0;padding:10px 14px;margin:12px 0;font-size:13px;line-height:1.7;}
+.callout.green{border-color:var(--green);background:var(--green-l);}
+.callout.amber{border-color:var(--amber);background:var(--amber-l);}
+.callout.red{border-color:var(--red);background:var(--red-l);color:var(--red);}
+.callout.blue{border-color:var(--blue);background:var(--blue-l);}
+.callout b{color:var(--ink);font-weight:700;}
+.mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
+@media(max-width:480px){.mode-cards{grid-template-columns:1fr;}}
+.mode-card{border-radius:10px;padding:14px 16px;border:1.5px solid;}
+.mode-card.pref{border-color:var(--blue);background:var(--blue-l);}
+.mode-card.fixed{border-color:var(--amber);background:var(--amber-l);}
+.mode-tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 10px;border-radius:12px;margin-bottom:8px;font-family:'DM Mono',monospace;}
+.mode-tag.pref{background:var(--blue);color:#fff;}
+.mode-tag.fixed{background:var(--amber);color:#fff;}
+.mode-card-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.mode-card p{font-size:12px;color:var(--ink2);line-height:1.7;}
+.slot-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
+.slot-table th{background:var(--ink);color:#e4e2da;padding:8px 12px;text-align:left;font-size:11px;font-family:'DM Mono',monospace;font-weight:400;letter-spacing:.04em;}
+.slot-table td{padding:7px 12px;border-bottom:1px solid var(--rule);font-family:'DM Mono',monospace;font-size:12px;}
+.slot-table tr:nth-child(even) td{background:#f5f2eb;}
+.slot-table tr:nth-child(odd) td{background:var(--white);}
+.block-am{color:var(--green);font-weight:700;}
+.block-pm{color:var(--blue);font-weight:700;}
+.deadline-box{background:var(--ink);color:#e4e2da;border-radius:10px;padding:16px 20px;display:flex;align-items:center;gap:16px;margin:14px 0;}
+.deadline-icon{font-size:28px;flex-shrink:0;}
+.deadline-main{font-size:18px;font-weight:700;}
+.deadline-sub{font-size:12px;color:#888;margin-top:2px;}
+.badge-inline{font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;font-family:monospace;vertical-align:middle;}
+.faq-list{display:flex;flex-direction:column;gap:10px;}
+.faq-item{border:1px solid var(--rule);border-radius:8px;overflow:hidden;}
+.faq-q{background:var(--white);padding:10px 14px;font-size:13px;font-weight:700;display:flex;gap:8px;align-items:baseline;}
+.faq-q::before{content:'Q';font-family:'DM Mono',monospace;color:var(--ink3);font-size:11px;flex-shrink:0;}
+.faq-a{padding:8px 14px;font-size:13px;color:var(--ink2);line-height:1.7;border-top:1px solid var(--rule);background:#faf8f4;}
+.faq-a::before{content:'A\3000';font-family:'DM Mono',monospace;color:var(--green);font-weight:700;}
+.footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--rule);font-size:12px;color:var(--ink3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+@media print{body{background:#fff;} .page{padding:16px;}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="doc-header">
+  <div class="doc-label">Studio Ivy — Instructor Guide</div>
+  <div class="doc-title">シフト希望 入力ガイド</div>
+  <div class="doc-sub">インストラクター向け　/ 毎月のシフト希望提出の手順</div>
+  <div class="url-chip">🔗 https://takashimiki.github.io/studio-ivy-shift/instructor_input_v2_3.html</div>
+</div>
+
+<div class="section">
+  <div class="deadline-box">
+    <div class="deadline-icon">📅</div>
+    <div>
+      <div class="deadline-main">毎月5日までに提出</div>
+      <div class="deadline-sub">翌月分のシフト希望を入力してください。5日を過ぎると送信できなくなります。</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-num">STEP 01</div>
+  <div class="sec-title">フォームを開く・名前を選ぶ</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">上記URLをブラウザで開く</div>
+        <div class="step-desc">スマホ・PCどちらでも使えます。LINEのリンクからそのまま開けます。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">右上のドロップダウンから自分の名前を選択</div>
+        <div class="step-desc">HITOMI / MAI.Y / AZUSA / RINA.F / SAYA / AOI.T から選んでください。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-num">STEP 02</div>
+  <div class="sec-title">入力モードを選ぶ</div>
+  <p style="font-size:13px;color:var(--ink2);margin-bottom:12px">左上の「希望」「固定」ボタンでモードを切り替えてからセルをクリックします。</p>
+  <div class="mode-cards">
+    <div class="mode-card pref">
+      <span class="mode-tag pref">希望モード</span>
+      <div class="mode-card-title">前半・後半以外の不定期、不定時間のシフト希望</div>
+      <p>セルを1つずつ個別にON/OFFできます。もう一度クリックで解除。</p>
+    </div>
+    <div class="mode-card fixed">
+      <span class="mode-tag fixed">固定モード</span>
+      <div class="mode-card-title">定期的に決まった時間枠（前半・後半）で入るシフトの希望</div>
+      <p>クリックで午前（1〜5）または午後（6〜10）の5コマが一括でONになります。</p>
+    </div>
+  </div>
+  <div class="callout amber">
+    <b>固定モードは（前半・後半）ブロック単位です。</b> 午前の枠をどれかクリックすると08:00〜13:20の5コマが全てONになります。もう一度クリックすると5コマ全てがOFFになります。
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-num">STEP 03</div>
+  <div class="sec-title">店舗を切り替えながら入力</div>
+  <p style="font-size:13px;color:var(--ink2);margin-bottom:12px">右上の「表示店舗」で後楽園店・本蓮沼店・どちらでもを切り替えながら入力します。</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">①</div>
+      <div class="step-body">
+        <div class="step-title">後楽園店のシフトを入力</div>
+        <div class="step-desc">「後楽園店」を選択して希望コマをクリック。セルに <span class="badge-inline" style="background:#1a4a7a;color:#fff;">後</span> バッジが表示されます。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">②</div>
+      <div class="step-body">
+        <div class="step-title">本蓮沼店のシフトを入力</div>
+        <div class="step-desc">「本蓮沼店」に切り替えて入力。セルに <span class="badge-inline" style="background:#1a4a7a;color:#fff;">本</span> バッジが表示されます。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">③</div>
+      <div class="step-body">
+        <div class="step-title">どちらでもOKなコマを入力（任意）</div>
+        <div class="step-desc">「どちらでも」を選んで入力。紫色のセルに <span class="badge-inline" style="background:#6B40B8;color:#fff;">両</span> バッジが表示されます。後楽園・本蓮沼どちらにも希望が入ります。</div>
+      </div>
+    </div>
+  </div>
+  <div class="callout green">
+    <b>同じ時間帯に2店舗は入力できません。</b> 後楽園で入力した枠を本蓮沼で選ぶと、後楽園側が自動的にクリアされます。
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-num">参考</div>
+  <div class="sec-title">レッスン枠一覧（1日10コマ）</div>
+  <table class="slot-table">
+    <thead><tr><th>枠</th><th>開始</th><th>終了</th><th>ブロック</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>08:00</td><td>08:50</td><td class="block-am">午前</td></tr>
+      <tr><td>2</td><td>09:20</td><td>10:10</td><td class="block-am">午前</td></tr>
+      <tr><td>3</td><td>10:40</td><td>11:30</td><td class="block-am">午前</td></tr>
+      <tr><td>4</td><td>12:00</td><td>12:50</td><td class="block-am">午前</td></tr>
+      <tr><td>5</td><td>13:20</td><td>14:10</td><td class="block-am">午前</td></tr>
+      <tr><td>6</td><td>14:40</td><td>15:30</td><td class="block-pm">午後</td></tr>
+      <tr><td>7</td><td>16:00</td><td>16:50</td><td class="block-pm">午後</td></tr>
+      <tr><td>8</td><td>17:20</td><td>18:10</td><td class="block-pm">午後</td></tr>
+      <tr><td>9</td><td>18:40</td><td>19:30</td><td class="block-pm">午後</td></tr>
+      <tr><td>10</td><td>20:00</td><td>20:50</td><td class="block-pm">午後</td></tr>
+    </tbody>
+  </table>
+  <div class="callout blue">
+    <b>ブロック一括ボタン：</b> 日付横の「午前▶1-5」「午後▶6-10」ボタンを押すと、その日の5コマを一括で希望としてON/OFFできます。
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-num">STEP 04</div>
+  <div class="sec-title">Googleドライブに保存して提出</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">画面下の「Googleドライブに保存」をタップ</div>
+        <div class="step-desc">全店舗分のデータが1つのファイルにまとめて保存されます。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Googleアカウントで許可（初回のみ）</div>
+        <div class="step-desc">ポップアップが開いたら自分のGoogleアカウントを選んで「許可」をタップ。2回目以降は自動です。</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">「✓ Googleドライブに保存しました」を確認</div>
+        <div class="step-desc">緑のメッセージが表示されたら提出完了です。</div>
+      </div>
+    </div>
+  </div>
+  <div class="callout amber">
+    <b>保存できない場合：</b>「CSVのみ」ボタンでファイルをダウンロードして、LINEでTakashiに送ってください。
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-num">STEP 05</div>
+  <div class="sec-title">提出後に修正したい場合</div>
+  <p style="font-size:13px;color:var(--ink2);margin-bottom:10px">入力し直して再度「Googleドライブに保存」を押すだけで上書きできます。<b>5日までであれば何度でも修正可能です。</b></p>
+  <div class="callout red">5日を過ぎると送信ボタンが無効になります。期限後の修正はTakashiに直接連絡してください。</div>
+</div>
+
+<div class="section">
+  <div class="sec-num">よくある質問</div>
+  <div class="sec-title">FAQ</div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q">何月分が表示されていますか？</div>
+      <div class="faq-a">常に翌月分が表示されます。例えば3月に開くと4月のカレンダーが表示されます。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">入力したセルを取り消したい</div>
+      <div class="faq-a">もう一度同じセルをクリックするとOFFになります。固定モードでブロックをクリックした場合はブロック全体がOFFになります。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">後楽園と本蓮沼の両方を入力しましたが、CSVは1つですか？</div>
+      <div class="faq-a">はい、1回の送信で両店舗分がまとめて1ファイルに保存されます。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">「このアプリはGoogleで確認されていません」と表示される</div>
+      <div class="faq-a">「詳細」→「安全ではないページに移動」をクリックして続行してください。社内ツールのため表示が出ますが安全に使用できます。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">スマホで枠が見切れる</div>
+      <div class="faq-a">横スクロールで全枠が表示されます。スマホを横向きにすると操作しやすくなります。</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Studio Ivy　後楽園店 / 本蓮沼店</span>
+  <span>提出期限：毎月5日</span>
+</div>
+
+</div>
+</body>
+</html>
